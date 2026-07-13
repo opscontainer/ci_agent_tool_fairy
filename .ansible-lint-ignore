@@ -1,0 +1,3 @@
+molecule/ syntax-check
+tests/ syntax-check
+.github/ syntax-check

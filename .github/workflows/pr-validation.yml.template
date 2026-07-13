@@ -1,0 +1,70 @@
+---
+name: Pull Request Validation
+on:
+  pull_request:
+  push:
+    branches:
+      - feature/*
+      - bugfix/*
+      - maintenance/*
+      - master
+
+permissions: read-all
+env:
+  CI: "true" # Needed for bash scripts found on ./scripts/src/ to work properly
+
+jobs:
+  pre-commit-checks:
+    runs-on: ubuntu-latest
+    name: Run Pre Commit Checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python 3.14
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.14'
+
+      - name: Install Dependencies
+        run: |
+          pip3 install pre-commit
+
+      - name: Push Event Checks
+        if: github.event_name != 'pull_request'
+        run: |
+          export PATH="~/.local/bin:$PATH"
+
+          pre-commit run --all-files
+
+      - name: Pull request checks
+        if: github.event_name == 'pull_request'
+        run: |
+          # this path is needed for pre-commit
+          export PATH="~/.local/bin:$PATH"
+          pre-commit run \
+            --show-diff-on-failure \
+            --from-ref origin/${GITHUB_BASE_REF} \
+            --to-ref HEAD
+
+  lint-and-secrets:
+    runs-on: ubuntu-latest
+    needs: pre-commit-checks
+    name: Lint files and check for secrets
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y tar
+          bash scripts/src/install-deps.sh
+
+      - name: Lint files and check for secrets
+        run: |
+          ## Run all the checks
+          bash scripts/main.sh
