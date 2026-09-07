@@ -1,6 +1,6 @@
-# Contributing to github_runner_setup
+# Contributing to ci_agent_tool_fairy
 
-Thank you for helping improve this Ansible role. <details here>, and contributions that improve reliability, platform support, documentation, or testing are very welcome.
+Thank you for helping improve this Ansible role 'ci_agent_tool_fairy', and contributions that improve reliability, platform support, documentation, or testing are very welcome.
 
 ## What you can contribute
 
